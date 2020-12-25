@@ -29,11 +29,13 @@ def products(request):
     })
 
 
-def customer(request, pk):
-    customer = get_object_or_404(Customer, id=pk)
+def customer(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
     orders = customer.order_set.all()
+    order_count = orders.count()
 
     return render(request, 'accounts/customer.html', {
         'customer': customer,
         'orders': orders,
+        'order_count': order_count
     })
