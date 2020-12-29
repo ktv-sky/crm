@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.fields.related import ForeignKey
 
 
 class Customer(models.Model):
@@ -48,8 +47,8 @@ class Order(models.Model):
         ('Delivered', 'Delivered')
     )
 
-    customer = ForeignKey(Customer, on_delete=models.CASCADE)
-    product = ForeignKey(Product, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS)
 

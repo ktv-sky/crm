@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 
-from .models import Product, Customer, Order, Tag
+from .models import Product, Customer, Order
 
 
 def home(request):
@@ -38,4 +38,10 @@ def customer(request, customer_id):
         'customer': customer,
         'orders': orders,
         'order_count': order_count
+    })
+
+
+def create_order(request):
+    return render(request, 'accounts/order_form.html', {
+
     })
