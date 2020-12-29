@@ -42,14 +42,18 @@ def customer(request, customer_id):
     })
 
 
-def create_order(request):
-    form = OrderForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        return redirect('home')
+def create_order(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
+    form = OrderForm(initial={'customer': customer})
+    if request.method == 'POST':
+        form = OrderForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
 
     return render(request, 'accounts/order_form.html', {
-        'form': form
+        'form': form,
+        'customer': customer
     })
 
 
