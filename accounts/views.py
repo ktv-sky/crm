@@ -1,6 +1,7 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Product, Customer, Order
+from .forms import OrderForm
+from .models import Customer, Order, Product
 
 
 def home(request):
@@ -42,6 +43,39 @@ def customer(request, customer_id):
 
 
 def create_order(request):
-    return render(request, 'accounts/order_form.html', {
+    form = OrderForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect('home')
 
+    return render(request, 'accounts/order_form.html', {
+        'form': form
+    })
+
+
+def update_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method != 'POST':
+        form = OrderForm(instance=order)
+    else:
+        form = OrderForm(data=request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+
+
+    return render(request, 'accounts/order_form.html', {
+        'form': form
+    })
+
+
+def delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        order.delete()
+        return redirect('home')
+
+    return render(request, 'accounts/delete.html', {
+        'item': order.product
     })
