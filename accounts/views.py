@@ -1,10 +1,55 @@
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .filters import OrderFilter
-from .forms import OrderForm
+from .forms import CreateUserForm, OrderForm
 from .models import Customer, Order, Product
 
 
+def register_page(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        form = CreateUserForm()
+        if request.method == 'POST':
+            form = CreateUserForm(data=request.POST)
+            if form.is_valid():
+                form.save()
+                user = form.cleaned_data.get('username')
+                messages.success(request, 'Account was created for ' + user)
+                return redirect('login')
+
+        return render(request, 'accounts/register.html', {
+            'form': form
+        })
+
+
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        if request.method == 'POST':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.info(request, 'Username or Password is incorrect')
+
+        return render(request, 'accounts/login.html', {})
+
+
+def logout_page(request):
+    logout(request)
+
+    return redirect('login')
+
+
+@login_required(login_url='login')
 def home(request):
     orders = Order.objects.all()
     customers = Customer.objects.all()
@@ -24,6 +69,7 @@ def home(request):
     })
 
 
+@login_required(login_url='login')
 def products(request):
     products = Product.objects.all()
     return render(request, 'accounts/products.html', {
@@ -31,6 +77,7 @@ def products(request):
     })
 
 
+@login_required(login_url='login')
 def customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     orders = customer.order_set.all()
@@ -47,6 +94,7 @@ def customer(request, customer_id):
     })
 
 
+@login_required(login_url='login')
 def create_order(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     form = OrderForm(initial={'customer': customer})
@@ -62,6 +110,7 @@ def create_order(request, customer_id):
     })
 
 
+@login_required(login_url='login')
 def update_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
@@ -79,6 +128,7 @@ def update_order(request, order_id):
     })
 
 
+@login_required(login_url='login')
 def delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':

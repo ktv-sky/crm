@@ -1,5 +1,11 @@
 {% load static %}
 
+<style>
+  .user_name {
+    margin-right: 20px;
+  }
+</style>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <img src="{% static 'images/logo.png' %}" alt="">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,4 +21,14 @@
       </li>
     </ul>
   </div>
+
+
+  {% if user.is_authenticated %}
+    <span class="user_name">Hello, {{ user.username }}!</span>
+    <span><a href="{% url 'logout' %}">Logout</span>
+  {% else %}
+    <span class="user_name">Hello, anonymous user!</span>
+    <span><a href="{% url 'login' %}">Login</span>
+  {% endif %}
+
 </nav>
