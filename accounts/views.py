@@ -1,8 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
-from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .decorators import admin_only, allowed_users, unauthenticated_user
@@ -19,8 +17,6 @@ def register_page(request):
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data.get('username')
-            group = Group.objects.get(name='customer')
-            user.groups.add(group)
             messages.success(request, 'Account was created for ' + username)
             return redirect('login')
 
@@ -55,7 +51,6 @@ def logout_page(request):
 def home(request):
     orders = Order.objects.all()
     customers = Customer.objects.all()
-
     total_customers = customers.count()
     total_orders = orders.count()
     delivered = orders.filter(status='Delivered').count()
@@ -75,6 +70,7 @@ def home(request):
 @allowed_users(allowed_roles=['admin'])
 def products(request):
     products = Product.objects.all()
+
     return render(request, 'accounts/products.html', {
         'products': products
     })
@@ -86,7 +82,6 @@ def customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     orders = customer.order_set.all()
     order_count = orders.count()
-
     my_filter = OrderFilter(request.GET, queryset=orders)
     orders = my_filter.qs
 
@@ -119,7 +114,6 @@ def create_order(request, customer_id):
 @allowed_users(allowed_roles=['admin'])
 def update_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-
     if request.method != 'POST':
         form = OrderForm(instance=order)
     else:
@@ -127,7 +121,6 @@ def update_order(request, order_id):
         if form.is_valid():
             form.save()
             return redirect('home')
-
 
     return render(request, 'accounts/order_form.html', {
         'form': form
@@ -150,7 +143,6 @@ def delete_order(request, order_id):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['customer'])
 def user_page(request):
-
     orders = request.user.customer.order_set.all()
     total_orders = orders.count()
     delivered = orders.filter(status='Delivered').count()
@@ -167,10 +159,8 @@ def user_page(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['customer'])
 def account_settings(request):
-
     customer = request.user.customer
     form = CustomerForm(instance=customer)
-
     if request.method == 'POST':
         form = CustomerForm(request.POST, request.FILES, instance=customer)
         if form.is_valid():
