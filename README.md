@@ -1,6 +1,6 @@
 # Customer Relationship Management system
 
-## On development stage
+## Running this project locally
 - Clone or download this repo
 - Create a virtual environment, and install from requirements.txt
 - Install PostgreSQL, create DB
