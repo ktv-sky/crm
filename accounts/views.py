@@ -49,12 +49,13 @@ def logout_page(request):
 @login_required(login_url='login')
 @admin_only
 def home(request):
-    orders = Order.objects.all()
+    qs = Order.objects.all().values_list('pk', flat=True)[:5]
+    orders = Order.objects.filter(pk__in=qs).order_by('-date_created')
     customers = Customer.objects.all()
     total_customers = customers.count()
-    total_orders = orders.count()
-    delivered = orders.filter(status='Delivered').count()
-    pending = orders.filter(status='Pending').count()
+    total_orders = Order.objects.all().count()
+    delivered = Order.objects.all().filter(status='Delivered').count()
+    pending = Order.objects.all().filter(status='Pending').count()
 
     return render(request, 'accounts/dashboard.html', {
         'orders': orders,
@@ -80,7 +81,7 @@ def products(request):
 @allowed_users(allowed_roles=['admin'])
 def customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
-    orders = customer.order_set.all()
+    orders = customer.order_set.all().order_by('date_created')
     order_count = orders.count()
     my_filter = OrderFilter(request.GET, queryset=orders)
     orders = my_filter.qs
